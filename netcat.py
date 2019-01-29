@@ -41,12 +41,19 @@ def main():
         usage()
 
     try:
+        # getopt()用来处理命令行参数，
+        # 第一个参数是要处理的参数的列表，通常是sys.argv[1:]
+        # 第二个参数是短格式的命令行参数，就是一个-加上一个字母，如果这个选项有附加参数，那么久在后面加个:
+        # (h l c u 是没有附加参数的, e t p 是有附加参数的)
+        # 第三个参数就是长格式的命令行参数，如--help --version
+        # 函数返回一个元组，opts是一个字典，包含对应选项的附加参数，如果没有附加参数就是空字符串，args是匹配不到的内容
         opts,args=getopt.getopt(sys.argv[1:], "hle:t:p:cu",
                 ["help","listen","execute","target","port","command","upload"])
     except getopt.GetoptError as err:
         print str(err)
         usage()
 
+    # 获得对应选项的附加参数之后就是用处理，该设置的就设置，该赋值的就赋值
     for o,a in opts:
         if o in ("-h","--help"):
             usage()
@@ -128,6 +135,10 @@ def run_command(command):
     command=command.rstrip()
 
     try:
+        # check_output()用来执行一个系统命令，shell赋值True则comman直接输入字符串，否则要使用列表
+        # 如果check_output()返回非0会直接引发异常
+        # 类似的还有call()
+        # subprocess官方文档：https://docs.python.org/2/library/subprocess.html
         output=subprocess.check_output(command,stderr=subprocess.STDOUT,shell=True)
     except:
         output="Failed to execute command. \r\n"
