@@ -86,9 +86,9 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
             client_socket.close()
             remote_socket.close()
             print "[*] No more data. Closing connections."
-
             break
 
+# maybe have bug
 def hexdump(src, length=16):
     result=[]
     digits=4 if isinstance(src, unicode) else 2
@@ -103,7 +103,8 @@ def hexdump(src, length=16):
 
 def receive_from(connection):
     buffer=""
-
+    
+    # 可以设置传输数据的超时时间
     connection.settimeout(2)
 
     try:
