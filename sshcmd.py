@@ -14,7 +14,9 @@ def usage():
     print 
 
 def ssh_command(ip, user, passwd, command):
+    # 创建一个SSH连接的客户端
     client=paramiko.SSHClient()
+    # 这是从文件导入密匙
     #client.load_host_keys('/home/snake/.ssh/known_hosts')
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
