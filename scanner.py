@@ -6,11 +6,15 @@ import time
 from ctypes import *
 from netaddr import IPNetwork,IPAddress
 
+# 监听的主机
 host="192.168.213.134"
+# 扫描的目标子网
 subnet="192.168.213.0/24"
 
+# 自定义的字符串，将在ICMP响应中进行核对
 magic_message="PYTHONRULES!"
 
+# 批量发送UDP数据包
 def udp_sender(subnet, magic_message):
     time.sleep(5)
     sender=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -79,6 +83,7 @@ sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 if os.name=="nt":
     sniffer.ioctl(socket.SID_RCVALL, socket.RCVALL_ON)
 
+# 开始发送数据包
 t=threading.Thread(target=udp_sender, args=(subnet, magic_message))
 t.start()
 
@@ -96,9 +101,11 @@ try:
 	    imcp_header=ICMP(buf)
 
 	    #print "ICMP -> Type: %d Code: %d" % (icmp_header.type,icmp_header.code)
-
+	    # 检查类型代码是否为3
 	    if icmp_header.code==3 and icmp_header.type==3:
+		# 确认响应的主机在子网内
 		if IPAddress(ip_header.src_address) in IPNetwork(subnet):
+		    # 确认ICMP数据包中包含自定义的字符串
 		    if raw_buffer[len(raw_buffer)-len(magic_message):]==magic_message:
 			print "Host up: %s" % ip_header.src_address
 
