@@ -3,8 +3,10 @@ import os
 import struct
 from ctypes import *
 
+# 监听的主机
 host="192.168.213.134"
 
+# IP头定义
 class IP(Structure):
     _fields_ = [
     ("ihl",		c_ubyte, 4),
@@ -24,17 +26,20 @@ class IP(Structure):
 	return self.from_buffer_copy(socket_buffer)
 
     def __init__(self, socket_buffer=None):
+	# 协议字段与协议名称对应
 	self.protocol_map={1:"ICMP", 6:"TCP", 17:"UDP"}
 
+	# 可读性更强的IP地址
 	self.src_address=socket.inet_ntoa(struct.pack("<L", self.src))
 	self.dst_address=socket.inet_ntoa(struct.pack("<L", self.dst))
-
+	
+	# 协议类型
 	try:
 	    self.protocol=self.protocol_map[self.protocol_num]
 	except:
 	    self.protocol=str(self.protocol_num)
-
-
+	
+# 下面的代码类似于sniffer.py的代码
 if os.name=="nt":
     socket_protocol=socket.IPPROTO_IP
 else:
@@ -50,11 +55,16 @@ if os.name=="nt":
 
 try:
     while True:
+	# 读取数据包
 	raw_buffer=sniffer.recvfrom(65565)[0]
+	# 将缓冲区的前20个字节按IP头进行解析
 	ip_header=IP(raw_buffer[0:20])
 	
+	# 输出协议通信双方的IP地址
 	print "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)
+# 处理CTRL + C
 except KeyboardInterrupt:
+    # 如果运行在windows系统上则关闭混杂模式
     if os.name=="nt":
 	sniffer.ioctl(socket.SID_RCVALL, socket.RCVALL_OFF)
     
