@@ -69,10 +69,13 @@ try:
 	
 	print "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)
 
+	# 如果为ICMP包则进行处理
 	if ip_header.protocol == "ICMP":
+	    # 计算ICMP包的起始位置
 	    offset=ip_header.ihl*4
 	    buf=raw_buffer[offset:offset+sizeof(ICMP)]
 
+	    # 解析ICMP包
 	    imcp_header=ICMP(buf)
 
 	    print "ICMP -> Type: %d Code: %d" % (icmp_header.type,icmp_header.code)
