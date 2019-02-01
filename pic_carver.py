@@ -1,7 +1,9 @@
-#############################################################################
-# apt-get install python-opencv python-numpy python-scipy		    #
-# wget http://eclecti.cc/files/2008/03/hearcascade_frontalface_alt.xml	    #
-#############################################################################
+###########################################################################################
+# 安装OpenCV库																				#
+# apt-get install python-opencv python-numpy python-scipy								   #
+# 获取人脸检测分类算法训练文件                                                               #
+# wget http://eclecti.cc/files/2008/03/hearcascade_frontalface_alt.xml	    		      #
+###########################################################################################
 
 import re
 import zlib
@@ -15,7 +17,9 @@ pacp_file="bhp.pcap"
 
 def get_http_headers(http_payload):
     try:
+	# 如果为HTTP流量，提取HTTP头
 	headers_raw=http_payload[:http_payload.index("\r\n\r\n")+2]
+	# 对HTTP头进行划分
 	header=dict(re.findall(r"(>P<name>.*?): (?P<value>.*?)\r\n", headers_raw))
 
     except:
@@ -32,9 +36,11 @@ def extract_image(headers, http_payload):
 
     try:
 	if "image" in headers["Content-Type"]:
+# 获取图像类型和图像数据
 	    image_type=headers["Content-Type"].split("/")[1]
 	    image=http_payload[http_payload.index("\r\n\r\n")+4:]
 
+	# 如果数据进行了压缩则解压
 	try:
 	    if "Content-Encoding" in headers.keys()L
 		if headers["content-Encoding"] == "deflate":
@@ -59,6 +65,7 @@ def face_detect(path, file_name):
 
     rects[:, 2:]+=rects[:, :2]
 
+	# 对图像中的人脸进行高亮显示处理
     for x1,y1,x2,y2 in rects:
 	cv2.rectangle(img, (x1, y1), (x2, y2), (127,255,0), 2)
     cv2.imwr("%s%s-%s" % (faces_directory, pcap_file, file_name), img)
@@ -89,6 +96,7 @@ def http_assemble(pacp_file):
     image,image_type=extract_image(headers, http_payload)
 
     if image is not None and image_type is not None:
+	# 存储图像
 	file_name="%s-pic_carver_%d.%s" % (pcap_file, carved_images, image_type)
 	fd=open("%s/%s" % (pictures_directory, file_name), "wb")
 
@@ -97,6 +105,7 @@ def http_assemble(pacp_file):
 
 	carved_images+=1
 
+	# 开始人脸检测
 	try:
 	    result=face_detect("%s/%s" % (pictures_directory, file_name), file_name)
 
